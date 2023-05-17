@@ -21,7 +21,8 @@ font_gameover = pygame.font.SysFont("Arial", 45)
 font_space = pygame.font.SysFont("Arial", 18)
 
 # Задаем начальные параметры змейки и яблока
-snake = [((MAP_SIZE[0] // 2) - 2, MAP_SIZE[1] // 2), ((MAP_SIZE[0] // 2) - 1, MAP_SIZE[1] // 2), (MAP_SIZE[0] // 2, MAP_SIZE[1] // 2)]
+snake = [((MAP_SIZE[0] // 2) - 2, MAP_SIZE[1] // 2), ((MAP_SIZE[0] // 2) - 1, MAP_SIZE[1] // 2),
+         (MAP_SIZE[0] // 2, MAP_SIZE[1] // 2)]
 
 direction = 0
 directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -49,14 +50,15 @@ while True:
                 direction = 1
             if event.key == pygame.K_SPACE and game_active == False:
                 game_active = True
-                snake = [((MAP_SIZE[0] // 2) - 2, MAP_SIZE[1] // 2), ((MAP_SIZE[0] // 2) - 1, MAP_SIZE[1] // 2), (MAP_SIZE[0] // 2, MAP_SIZE[1] // 2)]
+                snake = [((MAP_SIZE[0] // 2) - 2, MAP_SIZE[1] // 2), ((MAP_SIZE[0] // 2) - 1, MAP_SIZE[1] // 2),
+                         (MAP_SIZE[0] // 2, MAP_SIZE[1] // 2)]
                 apple_pos = random.randint(0, MAP_SIZE[0] - 1), random.randint(0, MAP_SIZE[1] - 1)
                 direction = 0
                 fps = 5
 
     # Выведем змейку и яблоко на экран
     [pygame.draw.rect(screen, 'green', (pos[0] * RECT_SIZE, pos[1] * RECT_SIZE, RECT_SIZE, RECT_SIZE)) for pos in snake]
-    pygame.draw.rect(screen, 'blue', (apple_pos[0] * RECT_SIZE, apple_pos[1] * RECT_SIZE, RECT_SIZE, RECT_SIZE))
+    pygame.draw.rect(screen, 'red', (apple_pos[0] * RECT_SIZE, apple_pos[1] * RECT_SIZE, RECT_SIZE, RECT_SIZE))
 
     # Логика движения змейки
     if game_active:
@@ -82,8 +84,7 @@ while True:
         replay_text = font_space.render("Press SPACE to replay", 1, "black")
         screen.blit(replay_text, (WIDTH // 2 - replay_text.get_width() // 2, HEIGHT // 2 + 10))
 
-
     score_text = font_score.render(f"Score: {len(snake)}", 1, "red")
-    screen.blit(score_text,(5,5))
+    screen.blit(score_text, (5, 5))
     pygame.display.update()
     clock.tick(fps)
