@@ -1,68 +1,92 @@
-from turtle import Turtle
-from random import randint
-import winsound
-import time
-STARTING_POSITIONS = [(0, 0), (-20, 0), (-40, 0)]
-MOVE_DISTANCE = 20
-UP = 90
-DOWN = 270
-LEFT = 180
-RIGHT = 0
+import pygame
+from surfaces import snake_body_surf, snake_head_up_surf, snake_head_left_surf, snake_head_right_surf, snake_head_down_surf, snake_head_dead_left_surf, snake_body_dead_surf, snake_head_dead_right_surf, snake_head_dead_down_surf, snake_head_dead_up_surf
 
 
 class Snake:
-    def __init__(self):
-        self.segments = []
-        self.create_snake()
-        self.head = self.segments[0]
-
-    def create_snake(self): 
-        for position in STARTING_POSITIONS:
-            self.add_segment(position)
-
-    def add_segment(self, position):
-        new_segment = Turtle("square")
-        new_segment.color("green")
-        new_segment.penup()
-        new_segment.goto(position)
-        self.segments.append(new_segment)
+    def __init__(self, RECT_COUNT):
+        self.segments = [((RECT_COUNT // 2) - 2, RECT_COUNT // 2), ((RECT_COUNT // 2) - 1, RECT_COUNT // 2),
+                 (RECT_COUNT // 2, RECT_COUNT // 2)]
+        self.current_snake_head = snake_head_right_surf # изначально змейка движется вправо, поэтому картинка головы должна быть направлена в ту же сторону
+        self.current_snake_body = snake_body_surf
+        self.direction = 4
+        self.directions = [(1, 0), (0, 1), (-1, 0), (0, -1), (0, 0)]
 
 
+    def spawn_snake(self, RECT_COUNT):
+        # Задаем начальные параметры змейки
+        self.segments = [((RECT_COUNT // 2) - 2, RECT_COUNT // 2), ((RECT_COUNT // 2) - 1, RECT_COUNT // 2),
+                 (RECT_COUNT // 2, RECT_COUNT // 2)]
+        self.current_snake_head = snake_head_right_surf
+        self.current_snake_body = snake_body_surf
+        self.direction = 4
+        self.directions = [(1, 0), (0, 1), (-1, 0), (0, -1), (0, 0)]
 
-    def dead_snake(self,screen):
-        dark_green_color = (1, 50, 32)
-        for segment in self.segments:
-            time.sleep(0.2)
-            segment.color(dark_green_color)
-            screen.update()
+    def is_inside(self, new_pos, RECT_COUNT):
+        if 0 <= new_pos[0] < RECT_COUNT and 0 <= new_pos[1] < RECT_COUNT:
+                return True
+        return False
 
+    def is_collide_with_wall(self, new_pos, walls):
+        if new_pos in walls:
+            return True
+        return False
+
+
+    def is_collide_with_bomb(self, new_pos, bombs):
+        if new_pos in bombs:
+            return True
+        return False
+
+
+    def is_collide_with_body(self, new_pos):
+        if new_pos in self.segments and self.direction != 4:
+            return True
+        return False
 
 
     def extend(self):
-        self.add_segment(self.segments[-1].position())
-        rand_color = (randint(0, 255), randint(0, 255), randint(0, 255))
-        for seg in self.segments[1:]:
-            seg.color(rand_color)
+        head_pos = self.segments[-1]
+        self.segments.append((head_pos[0] + self.directions[self.direction][0],
+                              head_pos[1] + self.directions[self.direction][1]))
+
 
     def move(self):
-        for seg_num in range(len(self.segments) - 1, 0, -1):
-            new_x = self.segments[seg_num - 1].xcor()
-            new_y = self.segments[seg_num - 1].ycor()
-            self.segments[seg_num].goto(new_x, new_y)
-        self.head.forward(MOVE_DISTANCE)
+        head_pos = self.segments[-1]
+        self.segments.append((head_pos[0] + self.directions[self.direction][0],
+                         head_pos[1] + self.directions[self.direction][1]))
+        self.segments.pop(0)
+
+
+    def get_head_of_dead_snake(self):
+        """Функция возвращает соответствующие картинки головы мертвой змейки"""
+        if self.current_snake_head == snake_head_up_surf:
+            self.current_snake_head = snake_head_dead_up_surf
+        elif self.current_snake_head == snake_head_right_surf:
+            self.current_snake_head = snake_head_dead_right_surf
+        elif self.current_snake_head == snake_head_left_surf:
+            self.current_snake_head = snake_head_dead_left_surf
+        else:
+            self.current_snake_head = snake_head_dead_down_surf
+        return self.current_snake_head
+
+
+    def die(self):
+        self.current_snake_head = self.get_head_of_dead_snake()
+        self.current_snake_body = snake_body_dead_surf
+
 
     def up(self):
-        if self.head.heading() != DOWN:
-            self.head.setheading(UP)
+        self.direction = 3
+        self.current_snake_head = snake_head_up_surf
 
     def down(self):
-        if self.head.heading() != UP:
-            self.head.setheading(DOWN)
+        self.direction = 1
+        self.current_snake_head = snake_head_down_surf
 
     def left(self):
-        if self.head.heading() != RIGHT:
-            self.head.setheading(LEFT)
+        self.direction = 2
+        self.current_snake_head = snake_head_left_surf
 
     def right(self):
-        if self.head.heading() != LEFT:
-            self.head.setheading(RIGHT)
+        self.direction = 0
+        self.current_snake_head = snake_head_right_surf
