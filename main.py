@@ -4,12 +4,12 @@ import pygame
 import pygame_menu
 from pygame_menu import themes
 
-os.environ['SDL_VIDEO_CENTERED'] = '1'
+os.environ['SDL_VIDEO_CENTERED'] = '1'  # Устанавливаем приложение по центру экрана
 
 pygame.mixer.pre_init(44100, -16, 1, 512)  # Убирает задержку звуков
 pygame.init()  # Инициализируем встроенные в библиотеку модули
 
-# Задаем настройки игры
+
 def get_screen_size(RECT_COUNT):
     """Функция обновляет размеры экрана согласно настройкам игры"""
     SCREEN_SIZE = [
@@ -17,6 +17,9 @@ def get_screen_size(RECT_COUNT):
         RECT_SIZE * RECT_COUNT + 2 * RECT_SIZE + MARGIN * RECT_COUNT + HEADER_MARGIN
     ]
     return SCREEN_SIZE
+
+
+# Задаем настройки игры
 
 FPS = 15
 RECT_SIZE = 30
@@ -47,77 +50,84 @@ pygame.display.set_caption("Snake by Minakov Daniil")
 clock = pygame.time.Clock()
 
 from surfaces import *  # импортируем поверхности с картинками змеи, квадратов, из которых состоит поле, еды
-from snake import Snake # Импортируем класс змейки
-from main_menu import show_main_menu # импортируем функцию, отбражающую главное меню
+from snake import Snake  # Импортируем класс змейки
+
+
+def draw_block_inside_map(surf, column, row):
+    """Функция отображает объекты на поле змейки"""
+    screen.blit(surf, [RECT_SIZE + column * RECT_SIZE + MARGIN * (column + 1),
+                       HEADER_MARGIN + RECT_SIZE + row * RECT_SIZE + MARGIN * (row + 1), RECT_SIZE,
+                       RECT_SIZE])
+
+
+def message_to_screen(message, y):
+    screen.blit(message, [screen.get_width() // 2 - message.get_width() // 2, y])
+
+
+def render_snake(snake, game_active):
+    """Функция отрисовывает змейку на экран"""
+    if game_active:
+        for pos_i in range(len(snake.segments)):
+            if pos_i == len(snake.segments) - 1:
+                draw_block_inside_map(snake.current_snake_head, snake.segments[pos_i][0], snake.segments[pos_i][1])
+            else:
+                draw_block_inside_map(snake.current_snake_body, snake.segments[pos_i][0], snake.segments[pos_i][1])
+    else:
+        for pos_i in range(len(snake.segments) - 1, -1, -1):
+            if pos_i == len(snake.segments) - 1:
+                draw_block_inside_map(snake.current_snake_head, snake.segments[pos_i][0], snake.segments[pos_i][1])
+            else:
+                draw_block_inside_map(snake.current_snake_body, snake.segments[pos_i][0], snake.segments[pos_i][1])
+
+def spawn_apple(GAME_MODE, snake, bomb_pos=None, walls=None):
+    """Функция возвращает случайные координаты еды для змейки"""
+    apple_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
+    if GAME_MODE == 3:
+        while apple_pos in snake.segments or apple_pos in walls or apple_pos == bomb_pos:
+            apple_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
+    elif GAME_MODE == 0:
+        while apple_pos in snake.segments:
+            apple_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
+    elif GAME_MODE == 1:
+        while apple_pos in snake.segments or apple_pos == bomb_pos:
+            apple_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
+    else:
+        while apple_pos in snake.segments or apple_pos in walls:
+            apple_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
+    return apple_pos
+
+def spawn_bomb(GAME_MODE, snake, apple_pos, walls):
+    """Функция возвращает случайные координаты бомбы для змейки"""
+    bomb_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
+    if GAME_MODE == 3:
+        while bomb_pos in snake.segments or bomb_pos == apple_pos or bomb_pos in walls:
+            bomb_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
+    elif GAME_MODE == 1:
+        while bomb_pos in snake.segments or bomb_pos == apple_pos:
+            bomb_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
+    return bomb_pos
+
+def spawn_wall(GAME_MODE, snake, apple_pos, bomb_pos, walls):
+    """Функция возвращает случайные координаты бомбы для змейки"""
+    wall_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
+    if GAME_MODE == 3:
+        while wall_pos in snake.segments or wall_pos == apple_pos or wall_pos == bomb_pos or wall_pos in walls:
+            wall_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
+    elif GAME_MODE == 2:
+        while wall_pos in snake.segments or wall_pos == apple_pos or wall_pos in walls:
+            wall_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
+    return wall_pos
+
+
+def write_highscore_in_file(highscore):
+    with open("best_score", "w") as best_f:
+        best_f.write(str(highscore))
 
 
 def start_the_game():
     global screen, clock
     # Останавливаем музыку из меню
     pygame.mixer.music.pause()
-
-    def draw_block_inside_map(surf, column, row):
-        """Функция отображает объекты на поле змейки"""
-        screen.blit(surf, [RECT_SIZE + column * RECT_SIZE + MARGIN * (column + 1),
-                           HEADER_MARGIN + RECT_SIZE + row * RECT_SIZE + MARGIN * (row + 1), RECT_SIZE,
-                           RECT_SIZE])
-
-    def message_to_screen(message, y):
-        screen.blit(message, [screen.get_width() // 2 - message.get_width() // 2, y])
-
-    def render_snake(snake, game_active):
-        """Функция отрисовывает змейку на экран"""
-        if game_active:
-            for pos_i in range(len(snake.segments)):
-                if pos_i == len(snake.segments) - 1:
-                    draw_block_inside_map(snake.current_snake_head, snake.segments[pos_i][0], snake.segments[pos_i][1])
-                else:
-                    draw_block_inside_map(snake.current_snake_body, snake.segments[pos_i][0], snake.segments[pos_i][1])
-        else:
-            for pos_i in range(len(snake.segments) - 1, -1, -1):
-                if pos_i == len(snake.segments) - 1:
-                    draw_block_inside_map(snake.current_snake_head, snake.segments[pos_i][0], snake.segments[pos_i][1])
-                else:
-                    draw_block_inside_map(snake.current_snake_body, snake.segments[pos_i][0], snake.segments[pos_i][1])
-
-    def spawn_apple():
-        """Функция возвращает случайные координаты еды для змейки"""
-        apple_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
-        if GAME_MODE == 3:
-            while apple_pos in snake.segments or apple_pos in walls or apple_pos == bomb_pos:
-                apple_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
-        elif GAME_MODE == 0:
-            while apple_pos in snake.segments:
-                apple_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
-        elif GAME_MODE == 1:
-            while apple_pos in snake.segments or apple_pos == bomb_pos:
-                apple_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
-        else:
-            while apple_pos in snake.segments or apple_pos in walls:
-                apple_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
-        return apple_pos
-
-    def spawn_bomb():
-        """Функция возвращает случайные координаты бомбы для змейки"""
-        bomb_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
-        if GAME_MODE == 3:
-            while bomb_pos in snake.segments or bomb_pos == apple_pos or bomb_pos in walls:
-                bomb_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
-        elif GAME_MODE == 1:
-            while bomb_pos in snake.segments or bomb_pos == apple_pos:
-                bomb_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
-        return bomb_pos
-
-    def spawn_wall():
-        """Функция возвращает случайные координаты бомбы для змейки"""
-        wall_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
-        if GAME_MODE == 3:
-            while wall_pos in snake.segments or wall_pos == apple_pos or wall_pos == bomb_pos:
-                wall_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
-        elif GAME_MODE == 2:
-            while wall_pos in snake.segments or wall_pos == apple_pos:
-                wall_pos = random.randint(0, RECT_COUNT - 1), random.randint(0, RECT_COUNT - 1)
-        return wall_pos
 
     def intro():
         """Функция, выводящая текст с правилами игры"""
@@ -164,16 +174,17 @@ def start_the_game():
 
     bomb_pos = (-100, -100)
     walls = []
-    apple_pos = spawn_apple()
-    bomb_pos = spawn_bomb()
+    apple_pos = spawn_apple(GAME_MODE, snake, bomb_pos, walls)
+    if GAME_MODE in [1, 3]:
+        bomb_pos = spawn_bomb(GAME_MODE, snake, apple_pos, walls)
 
     # Создаем таймер по которому будет шипеть змея
     hiss = pygame.USEREVENT + 1
     pygame.time.set_timer(hiss, 5000)
 
     # Запускаем цикл с игрой
-    is_alive = True # Если змейка жива, то равно True, иначе False
-    is_playing = True # Если включена игра, то равно True, иначе False
+    is_alive = True  # Если змейка жива, то равно True, если мертва или заполнила всю карту, то False
+    is_playing = True  # Если включена игра, то равно True, иначе False
     cheats = -1
 
     while is_playing:
@@ -206,15 +217,18 @@ def start_the_game():
                     if event.key == pygame.K_SPACE:
                         is_alive = True
                         snake.spawn_snake(RECT_COUNT)
+                        bomb_pos = (-100, -100)
                         walls = []
-                        apple_pos = spawn_apple()
-                        bomb_pos = spawn_bomb()
+                        apple_pos = spawn_apple(GAME_MODE, snake, bomb_pos, walls)
+                        if GAME_MODE in [1, 3]:
+                            bomb_pos = spawn_bomb(GAME_MODE, snake, apple_pos, walls)
                         pygame.mixer.music.unpause()
                     # Отслеживаем выход в меню в конце игры
                     if event.key == pygame.K_ESCAPE:
                         is_playing = False
                         pygame.mixer.music.pause()
                         main_menu()
+            # Отслеживаем шипение змеи
             if event.type == hiss and is_alive:
                 snake_hiss.play()
 
@@ -244,18 +258,14 @@ def start_the_game():
         if is_alive:
             new_pos = snake.segments[-1][0] + snake.directions[snake.direction][0], snake.segments[-1][1] + \
                       snake.directions[snake.direction][1]
-            if not snake.is_inside(new_pos, RECT_COUNT) or snake.is_collide_with_wall(new_pos,
-                                                                                      walls) or snake.is_collide_with_body(new_pos):
+            if not snake.is_inside(new_pos, RECT_COUNT) or snake.is_collide_with_wall(new_pos, walls) or snake.is_collide_with_body(new_pos):
                 if cheats == -1:
                     is_alive = False
                     hit_barrier.play()
                     snake.die()
-                # Если змейка врезалась в стену или окончательно взорвалась на бомбе, сохраняем рекорд
-                if highscore == len(snake.segments):
-                    with open("best_score", "w") as best_f:
-                        best_f.write(str(highscore))
+                    # Если змейка врезалась в стену сохраняем рекордное значение её длины
+                    write_highscore_in_file(highscore)
             else:
-
                 if snake.direction != 4:  # Если змейка не стоит на месте
                     # Логика поедания яблока и создания препядствий
                     if new_pos == apple_pos:
@@ -264,14 +274,13 @@ def start_the_game():
                         if len(snake.segments) == RECT_COUNT * RECT_COUNT - 1 - len(walls) and GAME_MODE in [3, 1] or \
                                 len(snake.segments) == RECT_COUNT * RECT_COUNT - len(walls) and GAME_MODE in [2, 0]:
                             is_alive = False
-                            pygame.mixer.music.pause()
                         else:
                             # Логика создания препятствий
-                            if (len(snake.segments) - 2) // 2 > len(walls) and GAME_MODE in [1, 3]:
-                                walls.append(spawn_wall())
+                            if (len(snake.segments) - 3) // 2 > len(walls) and GAME_MODE in [2, 3]:
+                                walls.append(spawn_wall(GAME_MODE, snake, apple_pos, bomb_pos, walls))
                             eat_apple.play()
-                            apple_pos = spawn_apple()
-                            # food_spawned.play()
+                            apple_pos = spawn_apple(GAME_MODE, snake, bomb_pos, walls)
+                        # Если текущая длина змеи больше рекордной, то меняем рекордную длину
                         if len(snake.segments) > highscore:
                             highscore = len(snake.segments)
                     else:
@@ -279,20 +288,19 @@ def start_the_game():
                     # Логика взаимодействия с бомбой
                     if new_pos == bomb_pos and GAME_MODE in [1, 3]:
                         if len(snake.segments[(len(snake.segments) + 1) // 2:]) == 0:
-                            is_alive = False
-                            snake.die()
-                            pygame.mixer.music.pause()
+                            if cheats == -1:
+                                is_alive = False
+                                snake.die()
+                                write_highscore_in_file(highscore)
                         else:
                             snake.segments = snake.segments[(len(snake.segments) + 1) // 2:]
                         bomb_explosion.play()
-                        bomb_pos = spawn_bomb()
+                        bomb_pos = spawn_bomb(GAME_MODE, snake, apple_pos, walls)
         else:
-
             # Отображаем полупрозрачный белый экран
             screen.blit(white_screen, (0, 0))
             message_to_screen(replay_text, SCREEN_SIZE[1] // 2 + 10)
             message_to_screen(escape_text, SCREEN_SIZE[1] // 2 + 40)
-
             # Если игра выиграна, то вывести надпись о победе, если проиграна, то отобразить надпись о проигрыше
             if len(snake.segments) == RECT_COUNT * RECT_COUNT - 1 - len(walls) and GAME_MODE in [3, 1] or len(
                     snake.segments) == RECT_COUNT * RECT_COUNT - len(walls):
@@ -302,6 +310,7 @@ def start_the_game():
 
         pygame.display.update()
         clock.tick(FPS)
+
 
 # Далее идет код главного меню
 def set_difficulty(difficulty, value):
@@ -327,9 +336,10 @@ def set_map_size(size, value):
 
 
 def set_sound_volume(volume, value):
-    global SOUND_VOLUME, SOUND_ID
+    global SOUND_ID, sounds
+    for sound_i in range(len(sounds)):
+        sounds[sound_i].set_volume(value/10)
     SOUND_ID = value
-    pygame.mixer.music.set_volume(SOUND_VOLUME)
 
 
 def set_game_mode(game_mode, value):
@@ -340,6 +350,7 @@ def set_game_mode(game_mode, value):
 def main_menu():
     """Функция, отвечающая за главное меню"""
     global screen
+
     def settings_menu():
         #  Создаем подменю с выбором настроек игры
         menu._open(settings)
@@ -393,7 +404,7 @@ def main_menu():
             menu.update(events)
             menu.draw(screen)
         pygame.display.update()
-
+        clock.tick(20)
 
 
 if __name__ == "__main__":
