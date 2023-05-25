@@ -3,6 +3,7 @@ import os
 import pygame
 import pygame_menu
 from pygame_menu import themes
+import sys
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'  # Устанавливаем приложение по центру экрана
 
@@ -146,7 +147,7 @@ def start_the_game():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    exit()
+                    sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         intro = False
@@ -193,7 +194,7 @@ def start_the_game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_0:
                     cheats *= -1
@@ -394,7 +395,7 @@ def main_menu():
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
-                exit()
+                sys.exit()
             # Добавим возможность с помощью кнопки ESCAPE возращаться к предыдущему меню
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
