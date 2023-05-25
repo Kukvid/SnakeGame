@@ -121,14 +121,20 @@ def spawn_wall(GAME_MODE, snake, apple_pos, bomb_pos, walls):
 
 
 def write_highscore_in_file(highscore):
+    """Функция записывает рекорд в файл"""
     with open("best_score", "w") as best_f:
         best_f.write(str(highscore))
 
 
+def read_highscore_from_file():
+    """Функция считывает рекорд из файла"""
+    with open("best_score", "r") as best_f:
+        highscore = int(best_f.readline())
+    return highscore
+
+
 def start_the_game():
     global screen, clock
-    # Останавливаем музыку из меню
-    pygame.mixer.music.pause()
 
     def intro():
         """Функция, выводящая текст с правилами игры"""
@@ -167,8 +173,7 @@ def start_the_game():
     white_screen.fill((255, 255, 255, 128))
 
     # Считываем предыдущий рекорд пользователя
-    with open("best_score", "r") as best_f:
-        highscore = int(best_f.readline())
+    highscore = read_highscore_from_file()
 
     # Задаем начальные параметры змейки, яблока, бомбы и препядствий
     snake = Snake(RECT_COUNT)
@@ -223,11 +228,9 @@ def start_the_game():
                         apple_pos = spawn_apple(GAME_MODE, snake, bomb_pos, walls)
                         if GAME_MODE in [1, 3]:
                             bomb_pos = spawn_bomb(GAME_MODE, snake, apple_pos, walls)
-                        pygame.mixer.music.unpause()
                     # Отслеживаем выход в меню в конце игры
                     if event.key == pygame.K_ESCAPE:
                         is_playing = False
-                        pygame.mixer.music.pause()
                         main_menu()
             # Отслеживаем шипение змеи
             if event.type == hiss and is_alive:
