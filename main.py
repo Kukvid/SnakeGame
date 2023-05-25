@@ -189,11 +189,11 @@ def start_the_game():
     pygame.time.set_timer(hiss, 5000)
 
     # Запускаем цикл с игрой
-    is_alive = True  # Если змейка жива, то равно True, если мертва или заполнила всю карту, то False
-    is_playing = True  # Если включена игра, то равно True, иначе False
+    is_game_active = True  # Если змейка жива, то равно True, если мертва или заполнила всю карту, то False
+    is_go_to_menu = False  # Если включена игра, то равно False, иначе True
     cheats = -1
 
-    while is_playing:
+    while not is_go_to_menu:
         # Проверяем все события, которые может создать пользователь
         changed_direction = False
         for event in pygame.event.get():
@@ -203,7 +203,7 @@ def start_the_game():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_0:
                     cheats *= -1
-                if is_alive:
+                if is_game_active:
                     # Если игра идет и змейка жива, то отслеживаем нажатие на стрелочки
                     if not changed_direction:
                         if event.key == pygame.K_RIGHT and snake.direction != 2:
@@ -221,7 +221,7 @@ def start_the_game():
                 else:
                     # Отслеживаем перезапуск игры и затем перезапускаем игру с начальными параметрами
                     if event.key == pygame.K_SPACE:
-                        is_alive = True
+                        is_game_active = True
                         snake.spawn_snake(RECT_COUNT)
                         bomb_pos = (-100, -100)
                         walls = []
@@ -230,10 +230,10 @@ def start_the_game():
                             bomb_pos = spawn_bomb(GAME_MODE, snake, apple_pos, walls)
                     # Отслеживаем выход в меню в конце игры
                     if event.key == pygame.K_ESCAPE:
-                        is_playing = False
+                        is_go_to_menu = True
                         main_menu()
             # Отслеживаем шипение змеи
-            if event.type == hiss and is_alive:
+            if event.type == hiss and is_game_active:
                 snake_hiss.play()
 
         # Заполнение экрана основным цветом и создание заголовка
@@ -251,7 +251,7 @@ def start_the_game():
 
         # Выведем еду, змейку, препятствия и бомбу на экран в зависимости от режима игры
         draw_block_inside_map(apple_surf, apple_pos[0], apple_pos[1])
-        render_snake(snake, is_alive)
+        render_snake(snake, is_game_active)
         if GAME_MODE in [1, 3]:
             draw_block_inside_map(bomb_surf, bomb_pos[0], bomb_pos[1])
         if GAME_MODE in [2, 3]:
@@ -259,12 +259,12 @@ def start_the_game():
                 draw_block_inside_map(wall_surf, wall[0], wall[1])
 
         # Логика движения змейки, поедания яблока, врезания в препятствие, поедания бомбы и отслеживание изменения счета, поражения и победы
-        if is_alive:
+        if is_game_active:
             new_pos = snake.segments[-1][0] + snake.directions[snake.direction][0], snake.segments[-1][1] + \
                       snake.directions[snake.direction][1]
             if not snake.is_inside(new_pos, RECT_COUNT) or snake.is_collide_with_wall(new_pos, walls) or snake.is_collide_with_body(new_pos):
                 if cheats == -1:
-                    is_alive = False
+                    is_game_active = False
                     hit_barrier.play()
                     snake.die()
                     # Если змейка врезалась в стену сохраняем рекордное значение её длины
@@ -277,7 +277,7 @@ def start_the_game():
                         # Проверка на победу
                         if len(snake.segments) == RECT_COUNT * RECT_COUNT - 1 - len(walls) and GAME_MODE in [3, 1] or \
                                 len(snake.segments) == RECT_COUNT * RECT_COUNT - len(walls) and GAME_MODE in [2, 0]:
-                            is_alive = False
+                            is_game_active = False
                         else:
                             # Логика создания препятствий
                             if (len(snake.segments) - 3) // 2 > len(walls) and GAME_MODE in [2, 3]:
@@ -293,7 +293,7 @@ def start_the_game():
                     if new_pos == bomb_pos and GAME_MODE in [1, 3]:
                         if len(snake.segments[(len(snake.segments) + 1) // 2:]) == 0:
                             if cheats == -1:
-                                is_alive = False
+                                is_game_active = False
                                 snake.die()
                                 write_highscore_in_file(highscore)
                         else:
