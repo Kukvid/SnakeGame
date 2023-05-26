@@ -267,7 +267,7 @@ def start_the_game():
                     is_game_active = False
                     hit_barrier.play()
                     snake.die()
-                    # Если змейка врезалась в стену сохраняем рекордное значение её длины
+                    # Если змейка врезалась в стену, в себя или в блоки, сохраняем рекордное значение её длины
                     write_highscore_in_file(highscore)
             else:
                 if snake.direction != 4:  # Если змейка не стоит на месте
