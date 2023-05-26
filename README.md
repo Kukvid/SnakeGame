@@ -21,13 +21,13 @@
 
 - Видео с геймплеем игры доступно по ссылке: (URL: https://rutube.ru/video/91d2e77ba41289c3a53ef05b43367869/)
 
-![image](https://github.com/Kukvid/SnakeGame/assets/80471950/a267a2b0-f607-4a60-930f-47554c4acab3) 
-![image](https://github.com/Kukvid/SnakeGame/assets/80471950/986b9354-667b-427b-880c-2f596d23de68)
+![image](https://github.com/Kukvid/SnakeGame/assets/80471950/5c2df8e9-7580-4695-bc13-b40896d4e888)
+![image](https://github.com/Kukvid/SnakeGame/assets/80471950/0c268042-be68-4c43-b9b7-1ef869cd4bbd)
 
                      Рисунок 1 – Главное меню                               Рисунок 2 – Подменю выбора режима игры
 
- ![image](https://github.com/Kukvid/SnakeGame/assets/80471950/5732dbb2-be26-4f4f-accd-25fe1dc77201)
- ![image](https://github.com/Kukvid/SnakeGame/assets/80471950/76d55a78-4de3-41c7-afbc-ff9034d935bf)
+![image](https://github.com/Kukvid/SnakeGame/assets/80471950/329ed5db-f5ce-477f-a330-0ea47c64165c)
+![image](https://github.com/Kukvid/SnakeGame/assets/80471950/99710a53-4bb4-4bc2-86e1-c63d394b195e)
  
                      Рисунок 3 – Подменю настроек                           Рисунок 4 – Стартовый экран с подсказками и приветствием
 
@@ -36,12 +36,12 @@
  
                Рисунок 5 – Изображение, с отмеченными на нем стенами (границами поля) Рисунок 6 – Изображение с блоками(препятствиями) 
 
-![image](https://github.com/Kukvid/SnakeGame/assets/80471950/bacd107e-c3ef-41a0-97e5-81d6a42d9b1b) 
-![image](https://github.com/Kukvid/SnakeGame/assets/80471950/c32ec791-c1d2-4cff-8051-ee5e0b70a27a) 
+![image](https://github.com/Kukvid/SnakeGame/assets/80471950/c28e05f4-83b6-4ff5-a024-903dfd32f62d)
+![image](https://github.com/Kukvid/SnakeGame/assets/80471950/47bd1f6d-c400-4264-b553-f22c318f5bf6)
 
                       Рисунок 7 – Изображение бомбы                          Рисунок 8 – Изображение живой змеи 
- ![image](https://github.com/Kukvid/SnakeGame/assets/80471950/e6661e19-619d-4645-bbca-d9f2a356c0ee)
- ![image](https://github.com/Kukvid/SnakeGame/assets/80471950/3bcf740b-5b26-4875-ad68-65b1c6744304)
+ ![image](https://github.com/Kukvid/SnakeGame/assets/80471950/e556c746-70f0-40fc-b8dd-c20df0c3cf21)
+![image](https://github.com/Kukvid/SnakeGame/assets/80471950/9055af97-9846-4356-a5f5-c53b1a5d191a)
  
                        Рисунок 9 – Изображение мертвой змеи                   Рисунок 10 – Изображение яблока
 # Фишки/ особенности
