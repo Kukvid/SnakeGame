@@ -13,7 +13,7 @@ class Snake:
         self.direction = 4
         self.directions = [(1, 0), (0, 1), (-1, 0), (0, -1), (0, 0)]
 
-    def spawn_snake(self, RECT_COUNT):
+    def respawn_snake(self, RECT_COUNT):
         # Задаем начальные параметры змейки
         self.segments = [((RECT_COUNT // 2) - 2, RECT_COUNT // 2), ((RECT_COUNT // 2) - 1, RECT_COUNT // 2),
                          (RECT_COUNT // 2, RECT_COUNT // 2)]
@@ -22,7 +22,7 @@ class Snake:
         self.direction = 4
         self.directions = [(1, 0), (0, 1), (-1, 0), (0, -1), (0, 0)]
 
-    def is_inside(self, new_pos, RECT_COUNT):
+    def is_inside_map(self, new_pos, RECT_COUNT):
         if 0 <= new_pos[0] < RECT_COUNT and 0 <= new_pos[1] < RECT_COUNT:
             return True
         return False
